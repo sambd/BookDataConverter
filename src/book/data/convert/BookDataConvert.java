@@ -11,7 +11,8 @@ public class BookDataConvert {
 	private static BookDataConvertService service = new BookDataConvertServiceImpl();
 	
 	public static void main(String[] args) {
-		String file = "resource/jsonInput1.txt";
+		String file = args[0];
+		//String file = "resource/jsonInput1.txt";
 		System.out.println("Reading input ...");
 		System.out.println("++++");
 		String readFile = service.readDataFromFile(file);
