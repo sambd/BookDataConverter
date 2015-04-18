@@ -6,9 +6,7 @@ It will convert book information of one text format to another text format. Book
 * You have to pass the **filepath** as a argument.
 * You have to set the **targetFormat** into properties file.
 
-
-
-    I also create Junit test cases for this project. Here, you can find success and error test cases. Following test cases occured for both (success & error):
+I also create Junit test cases for this project. Here, you can find success and error test cases. Following test cases occured for both (success & error):
 * Read data file
 * Read properties file
 * Convert text to json format
