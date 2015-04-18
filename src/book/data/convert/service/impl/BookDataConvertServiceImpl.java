@@ -1,9 +1,11 @@
 package book.data.convert.service.impl;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map.Entry;
 
@@ -79,6 +81,22 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 	
 	
 	@Override
+	public boolean checkISBN(String fileName){
+		String[] array = fileName.split("\n");
+		int i=0;
+		while(i < array.length){
+			String line = array[i];
+			String[] lineSplit = line.split(":");
+			if(lineSplit[0].toUpperCase().contains("ISBN")){
+				return true;
+			}
+			i++;
+		}
+		return false;
+	}
+	
+	
+	@Override
 	public String detectDataFormat(String fileName) {
 		String[] array = fileName.split("\n");
 		String line = array[0];
@@ -95,7 +113,7 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 	
 	
 	@Override
-	public void txtToJsonConvert(String fileName){
+	public void txtToJsonConvert(String fileName, String storageEnable, String storageFile){
 		try{
 			String[] array = fileName.split("\n");
 			JsonObject finalObj = new JsonObject();
@@ -125,6 +143,9 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			String json = gson.toJson(finalObj);
 			System.out.println(json);
+			if(storageEnable.equals("true")){
+				writeFile(json, storageFile);
+			}
 			
 		} catch (ArrayIndexOutOfBoundsException e){
 			System.out.println("Error to convert data into json format.");
@@ -133,16 +154,23 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 	
 	
 	@Override
-	public void jsonToTxtConvert(String fileName){
+	public void jsonToTxtConvert(String fileName, String storageEnable, String storageFile){
 		JsonParser parser = new JsonParser();
 		try {
+			StringBuilder sb = new StringBuilder();
 			JsonObject obj =  (JsonObject) parser.parse(new FileReader(fileName));
 			JsonObject innerObj = (JsonObject) obj.get("book");
+			int cnt=0;
 			for (Entry<String, JsonElement> entry : innerObj.entrySet()) {
 				String res = "";
 				String key = entry.getKey();
 				JsonElement value = entry.getValue();
-				key = capitalizeFirstCharacter(key);
+				if(key.equals("isbn")){
+					key = key.toUpperCase();
+				}
+				else{
+					key = capitalizeFirstCharacter(key);
+				}
 				res += (key + ": ");
 				
 				if(value.isJsonArray()){
@@ -157,13 +185,34 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 				else{
 					res += value.getAsString();
 				}
-				System.out.println(res);
+				sb.append(res);
+				if(cnt != innerObj.entrySet().size()-1){
+					sb.append("\n");
+				}
+				cnt++;
+			}
+			System.out.println(sb.toString());
+			if(storageEnable.equals("true")){
+				writeFile(sb.toString(), storageFile);
 			}
 			
 		} catch (FileNotFoundException e) {
 			System.out.println("Unable to open file '" + fileName + "'");
 		} catch (JsonParseException je) {
 			System.out.println("Error in gson parsing.");
+		}
+	}
+	
+	
+	private void writeFile(String inputData, String storageFile){
+		try {
+			FileWriter fileWriter = new FileWriter(storageFile);
+			BufferedWriter writer = new BufferedWriter(fileWriter);
+			writer.write(inputData);
+			writer.close();
+		} catch (IOException e) {
+			System.out.println(
+	                "Error writing to file '"+ storageFile + "'");
 		}
 	}
 }

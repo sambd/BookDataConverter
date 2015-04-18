@@ -9,11 +9,15 @@ public class BookDataConvertServiceTest {
 
 	private BookDataConvertService impl;
 	private String fileName;
+	private String storageEnable;
+	private String storageFile;
 	
 	@Before
 	public void setUp() throws Exception {
 		impl = new BookDataConvertServiceImpl();
 		fileName = "resource/textInput1.txt";
+		storageEnable = "false";
+		storageFile = "resource/output.txt";
 	}
 	
 	//@Test
@@ -56,7 +60,7 @@ public class BookDataConvertServiceTest {
 	public void testTxtToJsonConvert() {
 		System.out.println("Convert data into JSON format ...");
 		System.out.println("++++");
-		impl.txtToJsonConvert(impl.readDataFromFile(fileName));
+		impl.txtToJsonConvert(impl.readDataFromFile(fileName), storageEnable, storageFile);
 		System.out.println("----");
 	}
 
@@ -64,7 +68,7 @@ public class BookDataConvertServiceTest {
 	public void testTxtToJsonConvertError() {
 		System.out.println("Convert data into JSON format ...");
 		System.out.println("++++");
-		impl.txtToJsonConvert(impl.readDataFromFile("resource/textInput3.txt"));
+		impl.txtToJsonConvert(impl.readDataFromFile("resource/textInput3.txt"), storageEnable, storageFile);
 		System.out.println("----");
 	}
 	
@@ -72,7 +76,7 @@ public class BookDataConvertServiceTest {
 	public void testJsonToTxtConvert() {
 		System.out.println("Convert data into TXT format ...");
 		System.out.println("++++");
-		impl.jsonToTxtConvert(fileName);
+		impl.jsonToTxtConvert(fileName, storageEnable, storageFile);
 		System.out.println("----");
 	}
 	
@@ -80,7 +84,7 @@ public class BookDataConvertServiceTest {
 	public void testJsonToTxtConvertError(){
 		System.out.println("Convert data into TXT format ...");
 		System.out.println("++++");
-		impl.jsonToTxtConvert("resource/jsonInput3.txt");
+		impl.jsonToTxtConvert("resource/jsonInput3.txt", storageEnable, storageFile);
 		System.out.println("----");
 	}
 }
