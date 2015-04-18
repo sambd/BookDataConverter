@@ -22,6 +22,11 @@ import book.data.convert.service.BookDataConvertService;
 
 public class BookDataConvertServiceImpl implements BookDataConvertService{
 	
+	/**
+	 * Reading content of a file
+	 * 
+	 * @param fileName
+	 */
 	@Override
 	public String readDataFromFile(String fileName) {
 		try {
@@ -52,7 +57,11 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 		}
 	}
 	
-	
+	/**
+	 * Rearrange the content of a file into specific output format
+	 * 
+	 * @param fileName
+	 */
 	@Override
 	public String readFileOutputFormat(String fileName){
 		String[] array = fileName.split("\n");
@@ -65,6 +74,11 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 		return line;
 	}
 	
+	/**
+	 * Capitalize first character of a line
+	 * 
+	 * @param fileName
+	 */
 	private String capitalizeFirstCharacter(String line){
 		String str = line.trim();
 		if(str.contains("-")){
@@ -79,7 +93,11 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 		return str;
 	}
 	
-	
+	/**
+	 * Check whether a file contains ISBN or not
+	 * 
+	 * @param fileName
+	 */
 	@Override
 	public boolean checkISBN(String fileName){
 		String[] array = fileName.split("\n");
@@ -95,7 +113,11 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 		return false;
 	}
 	
-	
+	/**
+	 * Detect data format of a file
+	 * 
+	 * @param fileName
+	 */
 	@Override
 	public String detectDataFormat(String fileName) {
 		String[] array = fileName.split("\n");
@@ -111,7 +133,13 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 		return "ERROR";
 	}
 	
-	
+	/**
+	 * Convert a file from text to json & stored in a storage file
+	 * 
+	 * @param fileName
+	 * @param storgeEnabled
+	 * @param storageFile
+	 */
 	@Override
 	public void txtToJsonConvert(String fileName, String storageEnable, String storageFile){
 		try{
@@ -119,30 +147,34 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 			JsonObject finalObj = new JsonObject();
 			JsonObject obj = new JsonObject();
 			int i=0;
+			String res = "";
 			while(i < array.length){
 				String line = array[i];
-				String split[] = line.split(":");
-				String split1[] = split[1].split(",");
-				split[0] = split[0].replaceAll(" ", "-");
+				String lineSplit[] = line.split(":");
+				String innerSplit[] = lineSplit[1].split(",");
+				lineSplit[0] = lineSplit[0].replaceAll(" ", "-");
 				
 				JsonPrimitive primitive;
 				JsonArray jsonArray = new JsonArray();
-				if(split1.length > 1){
-					for(String element : split1){
+				if(innerSplit.length > 1){
+					for(String element : innerSplit){
 						primitive = new JsonPrimitive(element.trim());
 						jsonArray.add(primitive);
 					}
-					obj.add(split[0].toLowerCase(), jsonArray);
+					obj.add(lineSplit[0].toLowerCase(), jsonArray);
 				}
 				else{
-					obj.addProperty(split[0].toLowerCase(), split1[0].trim());
+					obj.addProperty(lineSplit[0].toLowerCase(), innerSplit[0].trim());
+				}
+				if(lineSplit[0].toLowerCase().equals("name")){
+					res += innerSplit[0].trim().toUpperCase();
 				}
 				i++;
 			}
 			finalObj.add("book", obj);
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			String json = gson.toJson(finalObj);
-			System.out.println(json);
+			System.out.println(res);
 			if(storageEnable.equals("true")){
 				writeFile(json, storageFile);
 			}
@@ -152,7 +184,13 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 		}
 	}
 	
-	
+	/**
+	 * Convert a file from json to text & stored in a storage file
+	 * 
+	 * @param fileName
+	 * @param storgeEnabled
+	 * @param storageFile
+	 */
 	@Override
 	public void jsonToTxtConvert(String fileName, String storageEnable, String storageFile){
 		JsonParser parser = new JsonParser();
@@ -161,37 +199,34 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 			JsonObject obj =  (JsonObject) parser.parse(new FileReader(fileName));
 			JsonObject innerObj = (JsonObject) obj.get("book");
 			int cnt=0;
+			String res = "";
 			for (Entry<String, JsonElement> entry : innerObj.entrySet()) {
-				String res = "";
 				String key = entry.getKey();
 				JsonElement value = entry.getValue();
-				if(key.equals("isbn")){
-					key = key.toUpperCase();
+				if(key.equals("name")){
+					res += value.getAsString().toUpperCase();
 				}
-				else{
-					key = capitalizeFirstCharacter(key);
-				}
-				res += (key + ": ");
+				sb.append(key);
+				sb.append(": ");
 				
 				if(value.isJsonArray()){
 					JsonArray array = value.getAsJsonArray();
 					for(int i=0; i<array.size(); i++){
 						String val = array.get(i).getAsString();
-						res += val;
+						sb.append(val);
 						if(i != array.size()-1)
-							res += ", ";
+							sb.append(", ");
 					}
 				}
 				else{
-					res += value.getAsString();
+					sb.append(value.getAsString());
 				}
-				sb.append(res);
 				if(cnt != innerObj.entrySet().size()-1){
 					sb.append("\n");
 				}
 				cnt++;
 			}
-			System.out.println(sb.toString());
+			System.out.println(res);
 			if(storageEnable.equals("true")){
 				writeFile(sb.toString(), storageFile);
 			}
@@ -203,7 +238,12 @@ public class BookDataConvertServiceImpl implements BookDataConvertService{
 		}
 	}
 	
-	
+	/**
+	 * Stored data in a storage file
+	 * 
+	 * @param inputData
+	 * @param storageFile
+	 */
 	private void writeFile(String inputData, String storageFile){
 		try {
 			FileWriter fileWriter = new FileWriter(storageFile);

@@ -1,5 +1,7 @@
 package book.data.convert.service;
 
+import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,7 +18,7 @@ public class BookDataConvertServiceTest {
 	public void setUp() throws Exception {
 		impl = new BookDataConvertServiceImpl();
 		fileName = "resource/textInput1.txt";
-		storageEnable = "false";
+		storageEnable = "true";
 		storageFile = "resource/output.txt";
 	}
 	
@@ -28,6 +30,17 @@ public class BookDataConvertServiceTest {
 		System.out.println("----");
 	}
 
+	//@Test
+	public void testReadDataFromFileError() {
+		System.out.println("Reading input ...");
+		System.out.println("++++");
+		String readFile = impl.readDataFromFile("resource/input.txt");
+		if(readFile != null){
+			System.out.println(readFile);
+		}
+		System.out.println("----");
+	}
+	
 	@Test
 	public void testReadFileOutputFormat() {
 		System.out.println("Convert input into output format ...");
@@ -56,6 +69,16 @@ public class BookDataConvertServiceTest {
 		}
 	}
 
+	@Test
+	public void testCheckISBN(){
+		assertEquals(true, impl.checkISBN(impl.readDataFromFile(fileName)));
+	}
+	
+	//@Test
+	public void testCheckISBNError(){
+		assertEquals(true, impl.checkISBN(impl.readDataFromFile("resource/textInput3.txt")));
+	}
+	
 	@Test
 	public void testTxtToJsonConvert() {
 		System.out.println("Convert data into JSON format ...");
